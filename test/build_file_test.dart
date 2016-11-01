@@ -50,11 +50,38 @@ void main() {
         new DartWebApplication(
           name: 'main_web',
           package: 'silly_monkey',
-          scriptFile: 'web/main.dart',
+          entryPoint: new HtmlEntryPoint(
+              htmlFile: 'web/index.html', dartFile: 'web/main.dart'),
         )
       ],
     );
     expect(build.toString(), loadGolden('build_file_web_application'));
+  });
+
+  test('should generate a library with multiple web targets', () {
+    build = new BuildFile(
+      libraries: [
+        new DartLibrary(
+          name: 'silly_monkey',
+          package: 'silly_monkey',
+        ),
+      ],
+      webApps: [
+        new DartWebApplication(
+          name: 'main_web',
+          package: 'silly_monkey',
+          entryPoint: new HtmlEntryPoint(
+              htmlFile: 'web/index.html', dartFile: 'web/main.dart'),
+        ),
+        new DartWebApplication(
+          name: 'secondary_web',
+          package: 'silly_monkey',
+          entryPoint: new HtmlEntryPoint(
+              htmlFile: 'web/secondary.html', dartFile: 'web/secondary.dart'),
+        )
+      ],
+    );
+    expect(build.toString(), loadGolden('build_file_web_application_multi'));
   });
 
   test('should generate a library with a binary target', () {

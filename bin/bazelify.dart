@@ -1,39 +1,31 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bazel/src/bazelify/arguments.dart';
-import 'package:bazel/src/bazelify/generate.dart';
+import 'package:args/command_runner.dart';
+import 'package:bazel/src/bazelify/command_runner.dart';
+import 'package:bazel/src/bazelify/exceptions.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 Future<Null> main(List<String> args) async {
-  // Parse into an object.
-  BazelifyArguments arguments;
-  try {
-    arguments = new BazelifyArguments.parse(args);
-    // Massage the arguments based on defaults.
-    arguments = await arguments.resolve();
-  } on ArgumentError catch (e) {
-    if (e.name != null) {
-      _printArgumentError(e);
+  var runner = new BazelifyCommandRunner();
+
+  await Chain.capture(() async {
+    await runner.run(args);
+  }, onError: (error, chain) {
+    if (error is UsageException) {
+      print(error.message);
+      print(error.usage);
+      exitCode = 64;
+    } else if (error is ApplicationFailedException) {
+      print(error.message);
+      exitCode = error.exitCode;
+      return;
     } else {
-      rethrow;
+      print('Whoops! You may have discovered a bug in `bazelify` :(.\n'
+          'Please file an issue at http://github.com/dart-lang/bazel');
+      print(error);
+      print(chain.terse);
+      exitCode = 1;
     }
-    _printUsage();
-    exitCode = 64;
-    return;
-  }
-
-  await Chain.capture(() => generate(arguments), onError: (error, chain) {
-    print(error);
-    print(chain.terse);
-    exitCode = 1;
   });
-}
-
-void _printArgumentError(ArgumentError e) {
-  print('Invalid arguments: ${e.message}');
-}
-
-void _printUsage() {
-  print(BazelifyArguments.getUsage());
 }
