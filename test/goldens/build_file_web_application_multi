@@ -5,9 +5,12 @@
 load("@io_bazel_rules_dart//dart/build_rules:core.bzl", "dart_library")
 
 # Bazelify: 2 web apps.
-load("@io_bazel_rules_dart//dart/build_rules:ddc.bzl", "dart_ddc_bundle")
-load("@io_bazel_rules_dart//dart/build_rules:dev_server.bzl", "dev_server")
-load("@io_bazel_rules_dart//dart/build_rules:web.bzl", "dart_web_application")
+load(
+    "@io_bazel_rules_dart//dart/build_rules:web.bzl",
+    "dart_web_application",
+    "dev_server",
+    "dart_ddc_bundle"
+)
 
 package(default_visibility = ["//visibility:public"])
 
@@ -30,13 +33,6 @@ dart_web_application(
     deps = _PUB_DEPS + [
         ":silly_monkey",
     ],
-)
-dev_server(
-    name = "main_web_dartium_serve",
-    deps = _PUB_DEPS + [
-        ":silly_monkey",
-    ],
-    data = glob(["web/**"]),
 )
 dart_ddc_bundle(
     name = "main_web_ddc_bundle",
@@ -65,13 +61,6 @@ dart_web_application(
     deps = _PUB_DEPS + [
         ":silly_monkey",
     ],
-)
-dev_server(
-    name = "secondary_web_dartium_serve",
-    deps = _PUB_DEPS + [
-        ":silly_monkey",
-    ],
-    data = glob(["web/**"]),
 )
 dart_ddc_bundle(
     name = "secondary_web_ddc_bundle",
